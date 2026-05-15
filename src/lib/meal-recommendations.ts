@@ -14,7 +14,7 @@ export interface MealRecommendation {
   tag: string
 }
 
-const RECOMMENDATIONS: Record<DietaryPreference, MealRecommendation[]> = {
+export const RECOMMENDATIONS: Record<DietaryPreference, MealRecommendation[]> = {
   plant_based: [
     // Breakfast
     {

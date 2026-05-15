@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { CalorieSummary } from '@/components/dashboard/calorie-summary'
 import { MealRecommendations } from '@/components/dashboard/meal-recommendations'
+import { SampleDayPlan } from '@/components/dashboard/sample-day-plan'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { calculateMacros } from '@/lib/macros'
@@ -133,7 +134,10 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Meal recommendations */}
+      {/* Sample day plan */}
+      <SampleDayPlan diet={profile.dietary_preference} targets={targets} />
+
+      {/* Meal recommendations by category */}
       <MealRecommendations diet={profile.dietary_preference} />
     </div>
   )
