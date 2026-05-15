@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { calculateMacros } from '@/lib/macros'
 import { toDateString, formatGoal } from '@/lib/utils'
 import Link from 'next/link'
+import { revalidatePath } from 'next/cache'
 import { Dumbbell, Droplets, Plus } from 'lucide-react'
 import type { DailyNutritionSummary, MealType } from '@/types'
 
@@ -149,6 +150,7 @@ function WaterLogButton({ userId, today }: { userId: string; today: string }) {
       'use server'
       const supabase = await createClient()
       await supabase.from('water_logs').insert({ user_id: userId, date: today, amount_ml: 250 })
+      revalidatePath('/dashboard')
     }} className="mt-3">
       <button type="submit" className="text-xs text-blue-600 font-medium hover:underline">
         + 250ml glass
