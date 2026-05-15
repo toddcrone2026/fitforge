@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { CalorieSummary } from '@/components/dashboard/calorie-summary'
+import { MealRecommendations } from '@/components/dashboard/meal-recommendations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { calculateMacros } from '@/lib/macros'
 import { toDateString, formatGoal } from '@/lib/utils'
 import Link from 'next/link'
-import { Dumbbell, Utensils, TrendingUp, Droplets, Plus } from 'lucide-react'
+import { Dumbbell, Droplets, Plus } from 'lucide-react'
 import type { DailyNutritionSummary, MealType } from '@/types'
 
 export default async function DashboardPage() {
@@ -132,21 +133,8 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Protein sources reminder for plant-based */}
-      {(profile.dietary_preference === 'plant_based' || profile.dietary_preference === 'pescatarian') && (
-        <Card className="border-emerald-100 bg-emerald-50/50">
-          <CardContent className="pt-4 pb-4">
-            <p className="text-sm font-semibold text-emerald-800 mb-1">
-              {profile.dietary_preference === 'plant_based' ? '🌱 Plant-Based Protein Sources' : '🐟 Pescatarian Protein Sources'}
-            </p>
-            <p className="text-xs text-emerald-700">
-              {profile.dietary_preference === 'plant_based'
-                ? 'Today\'s targets: Focus on tofu, tempeh, edamame, lentils, chickpeas, quinoa, and hemp seeds to hit your protein goal.'
-                : 'Great choices: salmon, sardines, tuna, shrimp, tofu, lentils, Greek yogurt, and eggs for complete amino acid profiles.'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Meal recommendations */}
+      <MealRecommendations diet={profile.dietary_preference} />
     </div>
   )
 }

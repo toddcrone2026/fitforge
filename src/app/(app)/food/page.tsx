@@ -3,13 +3,15 @@ import { useState, useEffect, useCallback } from 'react'
 import { FoodSearch } from '@/components/food/food-search'
 import { MealSection } from '@/components/food/meal-section'
 import { CalorieSummary } from '@/components/dashboard/calorie-summary'
+import { MealRecommendations } from '@/components/dashboard/meal-recommendations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { toDateString } from '@/lib/utils'
 import { calculateMacros } from '@/lib/macros'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import type { FoodItem, FoodLog, MacroTargets, MealType, DailyNutritionSummary } from '@/types'
+import type { FoodItem, FoodLog, MacroTargets, MealType, DailyNutritionSummary, DietaryPreference } from '@/types'
+import type { MealRecommendation } from '@/lib/meal-recommendations'
 
 export default function FoodPage() {
   const [date, setDate] = useState(toDateString())
@@ -17,6 +19,7 @@ export default function FoodPage() {
   const [targets, setTargets] = useState<MacroTargets | null>(null)
   const [activeMeal, setActiveMeal] = useState<MealType>('breakfast')
   const [loading, setLoading] = useState(true)
+  const [diet, setDiet] = useState<DietaryPreference>('pescatarian')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -31,6 +34,7 @@ export default function FoodPage() {
 
     if (profileRes.data) {
       setTargets(calculateMacros(profileRes.data.tdee, profileRes.data.fitness_goal, profileRes.data.weight_kg))
+      setDiet(profileRes.data.dietary_preference || 'omnivore')
     }
     setFoodLogs(logsRes.data || [])
     setLoading(false)
@@ -60,6 +64,29 @@ export default function FoodPage() {
       sugar_g: (food.nf_sugars || 0) * qty,
       photo_url: food.photo?.thumb,
     })
+    load()
+  }
+
+  async function handleLogRecommendation(meal: MealRecommendation) {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('food_logs').insert({
+      user_id: user.id,
+      date,
+      meal_type: meal.meal_type,
+      food_name: meal.name,
+      serving_qty: 1,
+      serving_unit: 'serving',
+      serving_weight_grams: 0,
+      calories: meal.calories,
+      protein_g: meal.protein_g,
+      carbs_g: meal.carbs_g,
+      fat_g: meal.fat_g,
+      fiber_g: meal.fiber_g,
+      sugar_g: 0,
+    })
+    setActiveMeal(meal.meal_type)
     load()
   }
 
@@ -153,6 +180,9 @@ export default function FoodPage() {
           />
         ))}
       </div>
+
+      {/* Meal recommendations */}
+      <MealRecommendations diet={diet} onLogMeal={handleLogRecommendation} />
     </div>
   )
 }
